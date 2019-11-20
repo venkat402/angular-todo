@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { MustMatch } from '../_helpers/mush-match.validator.service';
+import { MustMatch } from "../_helpers/mush-match.validator.service";
 @Component({
   selector: "app-register",
   templateUrl: "./register.component.html",
@@ -9,9 +9,12 @@ import { MustMatch } from '../_helpers/mush-match.validator.service';
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
   submitted = false;
-
+  showSucMesg = false;
   constructor(private formBuilder: FormBuilder) {}
-
+  usersData: any = new Array();
+  messages: any = {
+    usersData: "usersData"
+  };
   ngOnInit() {
     this.registerForm = this.formBuilder.group(
       {
@@ -25,20 +28,40 @@ export class RegisterComponent implements OnInit {
         validator: MustMatch("password", "confirmPassword")
       }
     );
+    this.checkLocalStorage();
   }
 
-  // convenience getter for easy access to form fields
   get f() {
     return this.registerForm.controls;
   }
 
   onSubmit() {
     this.submitted = true;
-
-    // stop here if form is invalid
     if (this.registerForm.invalid) {
       return;
     }
-    alert("SUCCESS!! :-)\n\n" + JSON.stringify(this.registerForm.value));
+    this.createUser(this.registerForm.value);
+  }
+
+  public createUser(data: any) {
+    this.usersData.push(data);
+    this.setLocalStorage(this.usersData);
+    this.showSucMesg = true;
+    this.registerForm.reset();
+    this.ngOnInit();
+  }
+
+  public checkLocalStorage() {
+    if (localStorage.getItem(this.messages.usersData)) {
+      this.usersData = JSON.parse(
+        localStorage.getItem(this.messages.usersData)
+      );
+    } else {
+      localStorage.setItem(this.messages.usersData, "");
+    }
+  }
+
+  public setLocalStorage(data) {
+    localStorage.setItem(this.messages.usersData, JSON.stringify(data));
   }
 }

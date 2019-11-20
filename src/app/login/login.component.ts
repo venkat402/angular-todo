@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MustMatch } from "../_helpers/mush-match.validator.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-login",
@@ -10,25 +11,26 @@ import { MustMatch } from "../_helpers/mush-match.validator.service";
 export class LoginComponent implements OnInit {
   registerForm: FormGroup;
   submitted = false;
+  usersData: any;
+  messages: any = {
+    usersData: "usersData",
+    home: "/home"
+  };
+  sucMsg = false;
+  failMsg = false;
+  isUserLogin: any;
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(private formBuilder: FormBuilder, private router: Router) {}
 
   ngOnInit() {
-    this.registerForm = this.formBuilder.group(
-      {
-        firstName: ["", Validators.required],
-        lastName: ["", Validators.required],
-        email: ["", [Validators.required, Validators.email]],
-        password: ["", [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ["", Validators.required]
-      },
-      {
-        validator: MustMatch("password", "confirmPassword")
-      }
-    );
+    this.registerForm = this.formBuilder.group({
+      email: ["", [Validators.required, Validators.email]],
+      password: ["", [Validators.required]]
+    });
+    this.getDataFromLocal();
+    this.checkLoginLocal();
   }
 
-  // convenience getter for easy access to form fields
   get f() {
     return this.registerForm.controls;
   }
@@ -36,10 +38,47 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
 
-    // stop here if form is invalid
     if (this.registerForm.invalid) {
       return;
     }
-    alert("SUCCESS!! :-)\n\n" + JSON.stringify(this.registerForm.value));
+
+    this.Login(this.registerForm.value.email, this.registerForm.value.password);
+  }
+
+  public Login(data_email, data_password) {
+    var target = this.usersData.find(temp => temp.email == data_email);
+    if (target) {
+      if (target.password == data_password) {
+        this.registerForm.reset();
+        this.sucMsg = true;
+        this.localStoreLogin(target);
+        this.router.navigate([this.messages.home]);
+      } else {
+        this.registerForm.reset();
+        this.failMsg = true;
+      }
+    } else {
+      this.registerForm.reset();
+      this.failMsg = true;
+    }
+    this.ngOnInit();
+  }
+
+  public getDataFromLocal() {
+    if (localStorage.getItem(this.messages.usersData)) {
+      this.usersData = JSON.parse(
+        localStorage.getItem(this.messages.usersData)
+      );
+    }
+  }
+
+  public localStoreLogin(data) {
+    localStorage.setItem("user_login", JSON.stringify(data));
+  }
+
+  public checkLoginLocal() {
+    if (localStorage.getItem("user_login")) {
+      this.isUserLogin = localStorage.getItem("user_login");
+    }
   }
 }
