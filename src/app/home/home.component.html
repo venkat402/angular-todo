@@ -1,0 +1,64 @@
+<div class="container">
+    <!-- main app container -->
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h3>TODO LIST APP</h3>
+                <div class="row" *ngIf="showSucMsg">
+                    <div class="col-xs-12">
+                        <p class="alert alert-success">
+                            <strong>Your request saved successfully!</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <form [formGroup]="registerForm" (ngSubmit)="onSubmit();">
+                    <div class="form-group">
+                        <label>Enter your task</label>
+                        <input type="text" formControlName="taskName" [(ngModel)]="enterTaskName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.taskName.errors }" />
+                        <div *ngIf="submitted && f.taskName.errors" class="invalid-feedback">
+                            <div *ngIf="f.taskName.errors.required">Task name is required</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary">Add Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- your task list code  -->
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-6">
+                <h3>Your tasks list </h3>
+            </div>
+            <div class="col-6">
+                <button style="float: right;" class="btn btn-primary" (click)="deleteAllTasks()">Delete All Task</button>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Sno</th>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th style="text-align: center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of tasks; index as i">
+                    <td>{{i+ 1}}</td>
+                    <td>{{item.taskName}}</td>
+                    <td>{{item.taskStatus}}</td>
+                    <td style="text-align: center">
+                        <button class="btn btn-primary" *ngIf="item.taskStatus == 'added'" (click)="markAsCompleted(i)"> Mark as completed</button> &nbsp;
+                        <button class="btn btn-primary" *ngIf="item.taskStatus == 'completed'" (click)="markAsInComplete(i)">Mark as incomplete</button> &nbsp;
+                        <button class="btn btn-warning" (click)="editTask(i)">Edit</button> &nbsp;
+                        <button class="btn btn-danger" (click)="deleteTask(i)">Delete</button> &nbsp;
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
